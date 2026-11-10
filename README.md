@@ -12,9 +12,9 @@ RossiGo è un'applicazione Java basata su Maven e SQLite per la gestione di una 
 1. Clona il repository.
 2. Apri il progetto con un IDE compatibile con Maven (es. IntelliJ IDEA).
 3. Esegui il build di Maven per scaricare le dipendenze (`jfiglet`, `codice-fiscale`, `commons-validator`, driver SQLite).
-4. Avvia il file `Main.java` situato nel pacchetto `org.example`.
+4. Avvia il file `App.Main.java` situato nel pacchetto `org.example`.
 
-## Scenari Simulati nel Main
+## Scenari Simulati nel App.Main
 Il programma simula i seguenti scenari di test:
 1. **Registrazione flotta e utenti**: Inizializzazione di bici, monopattini e utenti con validazione di email e codice fiscale.
 2. **Noleggio corretto**: Sblocco di un veicolo da parte di un utente idoneo e successiva terminazione con calcolo del costo e consumo batteria.
