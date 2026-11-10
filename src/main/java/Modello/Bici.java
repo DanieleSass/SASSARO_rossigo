@@ -1,11 +1,11 @@
-package org.example;
+package Modello;
 
-public class Bici extends Veicolo{
-    int numeroMarce;
+public class Bici extends Veicolo {
+    private int numeroMarce;
 
-    public Bici(int n, String c, int l, int b, stato s){
+    public Bici(int n, String c, int l, Stato s){
+        super(c,l,s);
         numeroMarce = n;
-        super(c,l,b,s);
     }
 
 
@@ -16,7 +16,7 @@ public class Bici extends Veicolo{
 
     @Override
     public double consumoBatteriaPerMinuto() {
-        return 2;
+        return 0.5;
     }
 
     public int getNumeroMarce() {
