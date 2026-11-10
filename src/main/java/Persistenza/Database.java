@@ -159,7 +159,6 @@ public class Database {
 
         ArrayList<Noleggio> listaNoleggi = new ArrayList<>();
 
-        // Per associare utente e veicolo al noleggio, recuperiamo le rispettive mappe
         HashMap<Integer, Utente> utentiMap = getUtentiMap();
         HashMap<String, Veicolo> veicoliMap = getVeicoliMap();
 
@@ -179,7 +178,7 @@ public class Database {
                 Veicolo veicolo = veicoliMap.get(codiceVeicolo);
 
                 if (utente != null && veicolo != null) {
-                    //convertiamo la stringa di inizio in LocalDateTime
+                    //converto la stringa di inizio in LocalDateTime
                     LocalDateTime oraInizio = LocalDateTime.parse(oraInizioStr);
 
                     LocalDateTime oraFine = null;

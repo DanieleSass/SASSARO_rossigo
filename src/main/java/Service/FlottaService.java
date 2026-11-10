@@ -42,7 +42,7 @@ public class FlottaService {
         String c = "";
         for (Utente u : utenti.values()){
             //println(u.getNome());
-            c+=u.getNome()+"\n";
+            c+=u.getId()+"\n";
         }
         return c;
     }
@@ -76,14 +76,11 @@ public class FlottaService {
         }
         catch (RuntimeException e) {
             throw new CodiceFiscaleNonValidoException(
-                    "Codice fiscale non valido",
-                    u.getCodiceFiscale(),
-                    e
-            );
+                    "Codice fiscale non valido",u.getCodiceFiscale(),e);
         }
 
         if(utenti.containsKey(u.getId())){
-            throw new IllegalArgumentException("Utente già registrato");
+            throw new RossiGoException("Utente già registrato");
         }
 
             //modifica il db
@@ -115,7 +112,7 @@ public class FlottaService {
             throw new CreditoInsufficienteException("Credito insufficiente per sbloccare", u.getCredito());
         }
 
-        //salvo in memoria e ripristino nel trycatch se query fallisce
+        //salvo in memoria e ripristino nel trycatch se modifica nel db fallisce
             Stato statoPrec = v.getStato();
 
             //qua vuol dire che può sbloccare
@@ -123,8 +120,6 @@ public class FlottaService {
 
             LocalDateTime oraInizio = LocalDateTime.now();
             Noleggio n = new Noleggio(u, v, oraInizio, null);
-
-
             try{
 
                 //aggiorno anche db
@@ -160,6 +155,7 @@ public class FlottaService {
 
             Noleggio n = null;
             for(Noleggio nn : FlottaService.noleggi){
+                //trova noleggio associato a quel veicolo che non si è ancora concluso
                 if(nn.getVeicolo().getCodice().equals(codice) && nn.getOraFine()==null){
                     n = nn;
                     break;

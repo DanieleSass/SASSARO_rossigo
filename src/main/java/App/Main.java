@@ -5,6 +5,7 @@ import Modello.Stato;
 import Modello.Utente;
 import Service.FlottaService;
 import com.github.lalyos.jfiglet.FigletFont;
+import com.github.lalyos.jfiglet.JFiglet;
 
 import java.io.IOException;
 
@@ -12,109 +13,125 @@ import static java.lang.IO.println;
 
 void main() {
 
-    //inizializzazione database
-    FlottaService.InizializzaDbDati();
-
-    //println("Print di test");
-    //println(FlottaService.stampaUtenti());
-    //println();
-
-    //banner iniziale
-    try {
+    try {   //ascii art
         String titolo = FigletFont.convertOneLine("Rossi GO");
         println(titolo);
     } catch (IOException e) {
-        System.err.println("Errore generazione dell'ASCII art: " + e.getMessage());
+        println("Impossibile caricare jfiglet");
     }
 
-    // n -> numero marce
-    // v -> velocità
-    Bici bici1 = new Bici(5, "BICI15", 100, Stato.Libero);
-    Monopattino monopattino = new Monopattino(25, "MONO15", 100, Stato.Libero);
 
-    Utente utente1 = new Utente(15, "Mario Rossi", "mario@email.it", "RSSMRA80A01H501U", 50.0);
-    Utente utente2 = new Utente(25, "Luca Bianchi", "luca@email.it", "BNCLCU80A01H501X", 0.50);
-    Utente utenteConPocoCredito = new Utente(3, "Luca Rossi", "luca.rossi@email.it", "RSSLCU80A01H501X", 10.0);
+    //inizializzazione del db e caricamento dati in memoria
+    FlottaService.InizializzaDbDati();
 
+    //creazione di entità di test
+    Bici bici1 = new Bici(6, "BICI_CENTRO", 100, Stato.Libero);
+    Monopattino mono1 = new Monopattino(25, "MONO_STAZIONE", 100, Stato.Libero);
+
+    Utente utenteRicco = new Utente(101, "Mario Rossi", "mario.rossi@email.it", "RSSMRA80A01H501U", 30.0);
+    Utente utentePovero = new Utente(102, "Luca Bianchi", "luca.bianchi@email.it", "SSSDNL08R01L736J", 0.50);
+
+    //registrazione nel db (e ovviamente anche nelle strutture dat)
     try {
         FlottaService.registraVeicolo(bici1);
-        FlottaService.registraVeicolo(monopattino);
-
-        FlottaService.registraUtente(utente1);
-        FlottaService.registraUtente(utente2);
-        FlottaService.registraUtente(utenteConPocoCredito);
-
     } catch (RossiGoException e) {
-        println("Errore registrazione: " + e.getMessage());
-    } catch (Exception e) {
-        println("Errore: " + e.getMessage());
+
     }
 
-    println();
-
-    //noleggio normalissimo
-    println("Noleggio normale");
     try {
-        FlottaService.sbloccaVeicolo("BICI15", 15);
-        FlottaService.terminaNoleggio("BICI15", 10);
-        println("Noleggio terminato correttamente.");
-    } catch (RossiGoException e) {
-        println(e.getMessage());
-    }
+        FlottaService.registraVeicolo(mono1);
+    } catch (RossiGoException e) {}
 
-    println();
-
-    //veicolo che non esiste
-    println("Veicolo che non esiste");
     try {
-        FlottaService.sbloccaVeicolo("BICI-XXXX", 15);
+        FlottaService.registraUtente(utenteRicco);
     } catch (RossiGoException e) {
-        println(e.getMessage());
+        println("Info: Utente 101 già registrato.");
     }
 
-    println();
-
-    //utente che non esiste
-    println("utente che non esiste");
     try {
-        FlottaService.sbloccaVeicolo("MONO15", 4);
+        FlottaService.registraUtente(utentePovero);
     } catch (RossiGoException e) {
-        println(e.getMessage());
+        println("Info: Utente 102 già registrato / errore: " + e.getMessage());
     }
 
     println();
 
-    //batteria non sufficiente
-    println("batteria non sufficiente");
+    //1 scenario->noleggio normale
+    println("1 usa una bici con successo");
     try {
-        Bici biciConBatteriaScarica = new Bici(30, "BICI25", 10, Stato.Libero);
-        FlottaService.registraVeicolo(biciConBatteriaScarica);
+        FlottaService.sbloccaVeicolo("BICI_CENTRO", 101);
+        println("BICI_CENTRO è stata sbloccata");
 
-        FlottaService.sbloccaVeicolo("BICI25", 25);
+        FlottaService.terminaNoleggio("BICI_CENTRO", 15);
+        println("Noleggio terminato dopo 15 minuti");
     } catch (RossiGoException e) {
-        println(e.getMessage());
+        println("Errore: " + e.getMessage() + "\n");
     }
 
     println();
 
-    //credito non sufficiente
-    println("credito non sufficiente");
+    //2 scenario->credito insufficiente (monopattin)
+    println("2 tentativo di sblocco con credito insufficiente");
     try {
-        FlottaService.sbloccaVeicolo("MONO12", 25);
+        FlottaService.sbloccaVeicolo("MONO_STAZIONE", 102);
+        println("Veicolo sbloccato");
     } catch (RossiGoException e) {
-        println(e.getMessage());
+        println("errore: " + e.getMessage() + " (credito insuffficiente)\n");
     }
 
     println();
 
-    //veicolo non disponibile
-    println("veicolo non disponibile");
+    //3 scenario->registrazione con cf errato
+    println("3 registrazione utente con cf errato.");
     try {
-        FlottaService.mettiInRicarica("MONO12");
-        FlottaService.sbloccaVeicolo("MONO12", 15);
+        Utente utenteErrato = new Utente(103, "Giuseppe Verdi", "verdi@email.it", "CF_ERRATO_123", 20.0);
+        FlottaService.registraUtente(utenteErrato);
+        println("utente registrato");
     } catch (RossiGoException e) {
-        println(e.getMessage());
+        println("errore: " + e.getMessage() + " (cf non giusto secondo legge)\n");
     }
 
     println();
+
+    //scenario 4->sbloccare un veicolo già in uso
+    println("4 sbloccare un veicolo già in uso");
+    try {
+        //metto il mono in uso
+        FlottaService.sbloccaVeicolo("MONO_STAZIONE", 101);
+
+        //provo a sbloccarlo
+        FlottaService.sbloccaVeicolo("MONO_STAZIONE", 102);
+
+    } catch (RossiGoException e) {
+        println("errore: " + e.getMessage() + " (occupato)\n");
+    } finally {
+        //lo sblocca cmq x dopo
+        try {
+            FlottaService.terminaNoleggio("MONO_STAZIONE", 5);
+        } catch (Exception e) {
+            //la ignora
+        }
+    }
+
+    println();
+
+    //scenario 5->batteria scarica <15%
+    println("5 sbloccare un veicolo con batteria scarica");
+    try {
+        Bici biciScarica = new Bici(4, "BICI_SCARICA", 10, Stato.Libero);
+        FlottaService.registraVeicolo(biciScarica);
+
+        FlottaService.sbloccaVeicolo("BICI_SCARICA", 101);
+    } catch (RossiGoException e) {
+        println("errore: " + e.getMessage() + " batteria <soglia.\n");
+    }
+
+    println();
+
+    //"scenario" 6->salvo dentro db
+    println("6 persistenza");
+
+    //con questo ricarica i dati, quindi ri-esegue le query
+    FlottaService.InizializzaDbDati();
+    println(FlottaService.stampaUtenti());   //di test
 }
